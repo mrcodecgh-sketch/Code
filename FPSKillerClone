@@ -1,7 +1,7 @@
 local Workspace = game:GetService("Workspace")
 
 local CONFIG = {
-    Cantidad = 100,
+    Cantidad = 400,
     Repeticiones = 5,
     NombreObjeto = "",
     ModoInstantaneo = true,
