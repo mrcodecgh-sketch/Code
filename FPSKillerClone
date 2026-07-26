@@ -1,0 +1,67 @@
+local Workspace = game:GetService("Workspace")
+
+local CONFIG = {
+    Cantidad = 100,
+    Repeticiones = 5,
+    NombreObjeto = "",
+    ModoInstantaneo = true,
+}
+
+local function terminaEnClone(nombre)
+    return string.sub(nombre, -6) == "_Clone"
+end
+
+local function encontrarObjeto()
+    if CONFIG.NombreObjeto ~= "" then
+        return Workspace:FindFirstChild(CONFIG.NombreObjeto)
+    else
+        for _, obj in ipairs(Workspace:GetChildren()) do
+            if terminaEnClone(obj.Name) then
+                return obj
+            end
+        end
+        return nil
+    end
+end
+
+local function clonarInstantaneo(target, total)
+    for i = 1, total do
+        local clone = target:Clone()
+        local separacion = 5
+        if clone.PrimaryPart then
+            local offset = CFrame.new(separacion * (i - 1), 0, 0)
+            clone:PivotTo(target.PrimaryPart.CFrame * offset)
+        else
+            local parte = clone:FindFirstChildWhichIsA("BasePart")
+            if parte then
+                parte.Position = parte.Position + Vector3.new(separacion * (i - 1), 0, 0)
+            end
+        end
+        clone.Parent = Workspace
+    end
+end
+
+local function mainLoop()
+    local repeticionesHechas = 0
+    print("[Clonador] Buscando objetos...")
+
+    while true do
+        if repeticionesHechas >= CONFIG.Repeticiones then
+            print("[Clonador] Completado: " .. CONFIG.Repeticiones .. " ciclos de " .. CONFIG.Cantidad .. " clones cada uno.")
+            break
+        end
+
+        local target = encontrarObjeto()
+        if target then
+            print("[Clonador] Objeto detectado: " .. target.Name .. " (ciclo " .. (repeticionesHechas + 1) .. "/" .. CONFIG.Repeticiones .. ")")
+            clonarInstantaneo(target, CONFIG.Cantidad)
+            repeticionesHechas = repeticionesHechas + 1
+            print("[Clonador] Ciclo " .. repeticionesHechas .. " completado.")
+        else
+            task.wait(0.5)
+        end
+    end
+end
+
+task.spawn(mainLoop)
+print("[Clonador] Script iniciado. Configuración: " .. CONFIG.Cantidad .. " clones x " .. CONFIG.Repeticiones .. " ciclos = " .. (CONFIG.Cantidad * CONFIG.Repeticiones) .. " clones totales.")
